@@ -4,6 +4,8 @@ import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 
+import authRouter from "./routes/auth.js";
+
 const app = express();
 
 /* ---------- Middleware ---------- */
@@ -11,6 +13,8 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors({ origin: true, credentials: true }));
 app.use(morgan("tiny"));
+
+app.use("/api/auth", authRouter);
 
 /* ---------- Health Check ---------- */
 app.get("/", (req, res) => {
