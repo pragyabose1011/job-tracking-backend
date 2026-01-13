@@ -6,6 +6,8 @@ import cookieParser from "cookie-parser";
 
 import authRouter from "./routes/auth.js";
 
+import protectedRouter from "./routes/protected.js";
+
 const app = express();
 
 /* ---------- Middleware ---------- */
@@ -15,6 +17,8 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(morgan("tiny"));
 
 app.use("/api/auth", authRouter);
+
+app.use("/api/protected", protectedRouter);
 
 /* ---------- Health Check ---------- */
 app.get("/", (req, res) => {
