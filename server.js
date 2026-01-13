@@ -4,42 +4,34 @@ import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 
-// ❌ DO NOT load dotenv on Railway
-// dotenv is ONLY for local dev
-
 const app = express();
 
-/* ---------------- Middleware ---------------- */
+/* ---------- Middleware ---------- */
 app.use(express.json());
-app.use(cookieParser(process.env.JWT_SECRET));
+app.use(cookieParser());
 app.use(cors({ origin: true, credentials: true }));
 app.use(morgan("tiny"));
 
-/* ---------------- Health Check ---------------- */
-// REQUIRED so Railway knows your app is alive
+/* ---------- Health Check ---------- */
 app.get("/", (req, res) => {
   res.status(200).send("Job Tracking API is running");
 });
 
-/* ---------------- Database ---------------- */
-const connectDB = async () => {
-  if (!process.env.MONGO_URI) {
-    throw new Error("MONGO_URI is missing");
-  }
-
-  await mongoose.connect(process.env.MONGO_URI);
-  console.log("✅ MongoDB connected");
-};
-
-/* ---------------- Start Server ---------------- */
+/* ---------- Start Server ---------- */
 const PORT = process.env.PORT || 8080;
 
-const start = async () => {
-  try {
-    console.log("PORT =", PORT);
-    console.log("MONGO_URI = FOUND");
+(async function start() {
+  console.log("PORT =", PORT);
+  console.log("MONGO_URI =", process.env.MONGO_URI ? "FOUND" : "MISSING");
 
-    await connectDB();
+  if (!process.env.MONGO_URI) {
+    console.error("❌ MONGO_URI missing at startup");
+    process.exit(1);
+  }
+
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("✅ MongoDB connected");
 
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Server running on port ${PORT}`);
@@ -48,7 +40,5 @@ const start = async () => {
     console.error("❌ Startup failed:", err.message);
     process.exit(1);
   }
-};
-
-start();
+})();
 

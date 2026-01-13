@@ -1,5 +1,3 @@
-import dotenv from "dotenv"
-dotenv.config()
 
 import mockData from "./mock-data.json" assert { type: "json" }
 import Job from "./models/jobModel.js"
