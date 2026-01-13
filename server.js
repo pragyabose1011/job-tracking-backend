@@ -13,7 +13,6 @@ import xss from "xss-clean";
 import mongoSanitize from "express-mongo-sanitize";
 import fileUpload from "express-fileupload";
 
-import connectDB from "./database/connectDB.js";
 import authenticateUser from "./middleware/authentication.js";
 
 // Routers
@@ -21,8 +20,6 @@ import authRouter from "./routes/authRoutes.js";
 import jobRouter from "./routes/jobRoutes.js";
 
 // Middleware
-import errorHandlerMiddleware from "./middleware/error-handler.js";
-import notFoundMiddleware from "./middleware/not-found.js";
 
 const app = express();
 
@@ -57,8 +54,6 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/jobs", authenticateUser, jobRouter);
 
 /* ---------- Error Handling ---------- */
-app.use(notFoundMiddleware);
-app.use(errorHandlerMiddleware);
 
 /* ---------- Start Server ---------- */
 const PORT = process.env.PORT;
@@ -73,7 +68,6 @@ const start = async () => {
       throw new Error("MONGO_URI is missing");
     }
 
-    await connectDB(process.env.MONGO_URI);
 
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Server running on port ${PORT}`);
