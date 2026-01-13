@@ -1,5 +1,12 @@
 import dotenv from "dotenv"
-dotenv.config()
+import path from "path"
+import { fileURLToPath } from "url"
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+dotenv.config({ path: path.join(__dirname, ".env") })
+console.log("MONGO_URI =", process.env.MONGO_URI)
 import "express-async-errors"
 import express from "express"
 const app = express()
@@ -59,7 +66,7 @@ app.use(errorHandlerMiddleware)
 const port = process.env.PORT || 5000 
 const start = async () => {
   try {
-    await connectDB(process.env.MONGO_URL)
+    await connectDB(process.env.MONGO_URI)
     app.listen(port, () =>
       console.log(`🚀 Server is listening on port ${port}...`)
     )
