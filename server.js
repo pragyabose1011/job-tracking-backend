@@ -1,52 +1,43 @@
 import dotenv from "dotenv"
 import express from "express"
 import mongoose from "mongoose"
-import "express-async-errors"
 
-// Load env FIRST
 dotenv.config()
 
-/* -------------------- App -------------------- */
 const app = express()
-
-/* -------------------- Middleware -------------------- */
 app.use(express.json())
 
-/* -------------------- Routes -------------------- */
+/* ---------- Health Route (CRITICAL) ---------- */
 app.get("/", (req, res) => {
-  res.status(200).send("🚀 Job Tracking API is running")
+  res.status(200).send("✅ Job Tracking Backend Live")
 })
 
-/* -------------------- Error Handler -------------------- */
+/* ---------- Error Handler ---------- */
 app.use((err, req, res, next) => {
   console.error(err)
-  res.status(500).json({
-    success: false,
-    message: err.message || "Internal Server Error",
-  })
+  res.status(500).json({ message: err.message })
 })
 
-/* -------------------- DB + Server -------------------- */
+/* ---------- Start Server ---------- */
 const PORT = process.env.PORT
 const MONGO_URI = process.env.MONGO_URI
 
-if (!MONGO_URI) {
-  throw new Error("❌ MONGO_URI is missing in environment variables")
-}
+if (!PORT) throw new Error("PORT not set")
+if (!MONGO_URI) throw new Error("MONGO_URI not set")
 
-const startServer = async () => {
+const start = async () => {
   try {
     await mongoose.connect(MONGO_URI)
     console.log("✅ MongoDB connected")
 
-    app.listen(PORT, () => {
+    app.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Server running on port ${PORT}`)
     })
-  } catch (error) {
-    console.error("❌ Failed to start server:", error)
+  } catch (err) {
+    console.error(err)
     process.exit(1)
   }
 }
 
-startServer()
+start()
 
