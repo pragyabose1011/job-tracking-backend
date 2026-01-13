@@ -1,73 +1,45 @@
-import dotenv from "dotenv";
-dotenv.config();
-
 import express from "express";
-import "express-async-errors";
 import mongoose from "mongoose";
-
 import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
-import helmet from "helmet";
-import xss from "xss-clean";
-import mongoSanitize from "express-mongo-sanitize";
-import fileUpload from "express-fileupload";
 
-import authenticateUser from "./middleware/authentication.js";
-
-// Routers
-import authRouter from "./routes/authRoutes.js";
-import jobRouter from "./routes/jobRoutes.js";
-
-// Middleware
+// ❌ DO NOT load dotenv on Railway
+// dotenv is ONLY for local dev
 
 const app = express();
 
-/* ---------- Debug (keep this) ---------- */
-console.log("PORT =", process.env.PORT);
-console.log("MONGO_URI =", process.env.MONGO_URI ? "FOUND" : "MISSING");
-
-/* ---------- Core Middleware ---------- */
+/* ---------------- Middleware ---------------- */
 app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));
+app.use(cors({ origin: true, credentials: true }));
 app.use(morgan("tiny"));
 
-app.use(
-  cors({
-    origin: ["http://localhost:5173", "https://indago-job.netlify.app"],
-    credentials: true,
-  })
-);
-
-app.use(helmet());
-app.use(xss());
-app.use(mongoSanitize());
-app.use(fileUpload({ useTempFiles: true }));
-
-/* ---------- Health Check (REQUIRED for Railway) ---------- */
+/* ---------------- Health Check ---------------- */
+// REQUIRED so Railway knows your app is alive
 app.get("/", (req, res) => {
   res.status(200).send("Job Tracking API is running");
 });
 
-/* ---------- Routes ---------- */
-app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/jobs", authenticateUser, jobRouter);
+/* ---------------- Database ---------------- */
+const connectDB = async () => {
+  if (!process.env.MONGO_URI) {
+    throw new Error("MONGO_URI is missing");
+  }
 
-/* ---------- Error Handling ---------- */
+  await mongoose.connect(process.env.MONGO_URI);
+  console.log("✅ MongoDB connected");
+};
 
-/* ---------- Start Server ---------- */
-const PORT = process.env.PORT;
-
-if (!PORT) {
-  throw new Error("PORT is not defined (Railway should provide this)");
-}
+/* ---------------- Start Server ---------------- */
+const PORT = process.env.PORT || 8080;
 
 const start = async () => {
   try {
-    if (!process.env.MONGO_URI) {
-      throw new Error("MONGO_URI is missing");
-    }
+    console.log("PORT =", PORT);
+    console.log("MONGO_URI = FOUND");
 
+    await connectDB();
 
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Server running on port ${PORT}`);
