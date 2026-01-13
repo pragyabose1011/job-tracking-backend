@@ -3,43 +3,42 @@ dotenv.config();
 
 import express from "express";
 import mongoose from "mongoose";
-import cors from "cors";
-import helmet from "helmet";
-import morgan from "morgan";
 
 const app = express();
 
-/* ===================== MIDDLEWARE ===================== */
-app.use(express.json());
-app.use(cors());
-app.use(helmet());
-app.use(morgan("dev"));
+console.log("BOOT: process.env.PORT =", process.env.PORT);
+console.log("BOOT: process.env.MONGO_URI exists =", !!process.env.MONGO_URI);
 
-/* ===================== ROUTES ===================== */
 app.get("/", (req, res) => {
-  res.status(200).send("Job Tracking API is running");
+  res.status(200).send("API alive");
 });
 
-/* ===================== START SERVER ===================== */
-const PORT = process.env.PORT || 5001;
+const PORT = Number(process.env.PORT);
 
-const startServer = async () => {
+if (!PORT) {
+  console.error("❌ PORT missing — Railway will 502");
+  process.exit(1);
+}
+
+const start = async () => {
   try {
     if (!process.env.MONGO_URI) {
-      throw new Error("MONGO_URI is missing");
+      throw new Error("MONGO_URI missing");
     }
 
+    console.log("Connecting to MongoDB...");
     await mongoose.connect(process.env.MONGO_URI);
-    console.log("✅ MongoDB connected");
+    console.log("✅ Mongo connected");
 
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`🚀 Listening on ${PORT}`);
     });
   } catch (err) {
-    console.error("❌ Startup error:", err.message);
+    console.error("❌ FATAL STARTUP ERROR");
+    console.error(err);
     process.exit(1);
   }
 };
 
-startServer();
+start();
 
