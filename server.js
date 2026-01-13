@@ -1,43 +1,45 @@
-import dotenv from "dotenv"
-import express from "express"
-import mongoose from "mongoose"
+import dotenv from "dotenv";
+dotenv.config();
 
-dotenv.config()
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import helmet from "helmet";
+import morgan from "morgan";
 
-const app = express()
-app.use(express.json())
+const app = express();
 
-/* ---------- Health Route (CRITICAL) ---------- */
+/* ===================== MIDDLEWARE ===================== */
+app.use(express.json());
+app.use(cors());
+app.use(helmet());
+app.use(morgan("dev"));
+
+/* ===================== ROUTES ===================== */
 app.get("/", (req, res) => {
-  res.status(200).send("✅ Job Tracking Backend Live")
-})
+  res.status(200).send("Job Tracking API is running");
+});
 
-/* ---------- Error Handler ---------- */
-app.use((err, req, res, next) => {
-  console.error(err)
-  res.status(500).json({ message: err.message })
-})
+/* ===================== START SERVER ===================== */
+const PORT = process.env.PORT || 5000;
 
-/* ---------- Start Server ---------- */
-const PORT = process.env.PORT
-const MONGO_URI = process.env.MONGO_URI
-
-if (!PORT) throw new Error("PORT not set")
-if (!MONGO_URI) throw new Error("MONGO_URI not set")
-
-const start = async () => {
+const startServer = async () => {
   try {
-    await mongoose.connect(MONGO_URI)
-    console.log("✅ MongoDB connected")
+    if (!process.env.MONGO_URI) {
+      throw new Error("MONGO_URI is missing");
+    }
 
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`🚀 Server running on port ${PORT}`)
-    })
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("✅ MongoDB connected");
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
   } catch (err) {
-    console.error(err)
-    process.exit(1)
+    console.error("❌ Startup error:", err.message);
+    process.exit(1);
   }
-}
+};
 
-start()
+startServer();
 
