@@ -1,8 +1,5 @@
 
-![Logo](https://res.cloudinary.com/die12ywpb/image/upload/v1677817637/indago/Minimalist_Brown_Music_Logo_fInstagrfam_stguyl.png)
-
-
-# Indago - REST API
+# JobFlow - REST API
 This API is built using Node.js and Express.js for the Indago web app, which is a platform to track and manage job applications. 
 
 It uses Cloudinary API for images upload, JSON Web tokens for user authentication, and MongoDB for data storage, with Mongoose as the ORM..
